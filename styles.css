@@ -1,0 +1,670 @@
+/* ================================================================
+   HANGMAN — styles.css
+   Aesthetic: Dark editorial · warm noir · typewriter meets gallows
+   ================================================================ */
+
+/* ── Google Fonts are loaded in HTML <head> ── */
+
+/* ────────────────────────────────────────────
+   CSS Custom Properties
+   ──────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:           #0c0b0a;
+  --surface:      rgba(255, 255, 255, 0.03);
+  --surface-hi:   rgba(255, 255, 255, 0.06);
+
+  /* Borders */
+  --border:       rgba(255, 255, 255, 0.08);
+  --border-hi:    rgba(255, 255, 255, 0.14);
+
+  /* Text */
+  --text:         #ddd5c4;
+  --text-dim:     rgba(221, 213, 196, 0.45);
+  --text-xdim:    rgba(221, 213, 196, 0.22);
+
+  /* Accent palette */
+  --gold:         #c9a84c;
+  --gold-dim:     rgba(201, 168, 76, 0.15);
+  --red:          #c44040;
+  --red-dim:      rgba(196,  64,  64, 0.18);
+  --green:        #6a9e6a;
+  --green-dim:    rgba(106, 158, 106, 0.18);
+
+  /* Gallows / hangman */
+  --gallows-stroke: #7a6448;
+  --body-stroke:    #c44040;
+
+  /* Sizing */
+  --nav-h:    60px;
+  --radius:   10px;
+  --radius-sm: 6px;
+}
+
+/* ────────────────────────────────────────────
+   Reset & Base
+   ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'EB Garamond', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ────────────────────────────────────────────
+   Atmospheric background orbs
+   ──────────────────────────────────────────── */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-a {
+  width: 500px; height: 500px;
+  top: -120px; left: -100px;
+  background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+}
+.orb-b {
+  width: 400px; height: 400px;
+  bottom: -80px; right: -60px;
+  background: radial-gradient(circle, rgba(196,64,64,0.04) 0%, transparent 70%);
+}
+
+/* ────────────────────────────────────────────
+   Navigation
+   ──────────────────────────────────────────── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 4vw, 48px);
+  background: rgba(12, 11, 10, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+.brand-glyph {
+  width: 28px; height: 36px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.brand-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--text);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ────────────────────────────────────────────
+   Buttons
+   ──────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  font-family: 'EB Garamond', serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover {
+  background: var(--surface-hi);
+  border-color: var(--border-hi);
+  color: var(--text);
+}
+
+.btn-primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0c0b0a;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: #d4b45a;
+  border-color: #d4b45a;
+}
+
+.btn-lg { padding: 11px 28px; font-size: 1rem; border-radius: var(--radius); }
+
+/* ────────────────────────────────────────────
+   Game Layout (two-panel)
+   ──────────────────────────────────────────── */
+.game-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - var(--nav-h));
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 40px) clamp(16px, 4vw, 48px);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+
+/* ────────────────────────────────────────────
+   Gallows Panel (left)
+   ──────────────────────────────────────────── */
+.gallows-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gallows-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.hangman-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Gallows structure — warm rope-brown */
+.gallows-structure line,
+.gallows-structure path {
+  stroke: var(--gallows-stroke);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Body parts — hidden by default, revealed via JS */
+.body-part {
+  stroke: var(--body-stroke);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+
+  /* Draw-on animation via stroke-dasharray trick */
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+}
+
+.body-part.revealed {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* Head circle uses circumference: 2π × 21 ≈ 132 */
+#part-head {
+  stroke-dasharray: 132;
+  stroke-dashoffset: 132;
+}
+
+/* Death face – slightly dimmer details */
+.death-face line,
+.death-face path {
+  stroke: var(--body-stroke);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0;
+  transition: opacity 0.4s ease 0.3s;
+}
+#part-face.revealed line,
+#part-face.revealed path { opacity: 1; }
+
+/* Tries pips */
+.tries-block,
+.wrong-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-xdim);
+  font-family: 'EB Garamond', serif;
+  margin-bottom: 10px;
+  font-style: normal;
+}
+
+.tries-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: background 0.3s, opacity 0.3s;
+}
+.pip-active  { background: var(--green); box-shadow: 0 0 6px rgba(106,158,106,0.4); }
+.pip-used    { background: var(--red-dim); border: 1px solid var(--red); opacity: 0.5; }
+
+.wrong-list {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.95rem;
+  color: var(--red);
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  word-break: break-all;
+  min-height: 24px;
+}
+
+/* ────────────────────────────────────────────
+   Word Panel (right)
+   ──────────────────────────────────────────── */
+.word-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-top: 8px;
+}
+
+/* Hint */
+.hint-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.hint-badge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: 'EB Garamond', serif;
+}
+.hint-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Word display — flex row of letter tiles */
+.word-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 80px;
+  align-items: flex-end;
+}
+
+.word-display.shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.letter-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(34px, 5vw, 52px);
+  height: clamp(44px, 6vw, 62px);
+  border-bottom: 2px solid var(--border-hi);
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: transparent;           /* hidden until revealed */
+  text-transform: uppercase;
+  transition: color 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.letter-tile.revealed {
+  color: var(--text);
+  border-color: var(--gold);
+  animation: letterPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Keyboard */
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 7px;
+  max-width: 420px;
+}
+
+.key-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 9px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background   0.15s,
+    border-color 0.15s,
+    color        0.15s,
+    transform    0.1s,
+    box-shadow   0.15s;
+  user-select: none;
+  /* Typewriter key depth illusion */
+  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+}
+.key-btn:hover:not(:disabled) {
+  background: var(--surface-hi);
+  border-color: var(--border-hi);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.key-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* Correct guess — green tint */
+.key-btn.key-correct {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+  cursor: default;
+  box-shadow: none;
+}
+
+/* Wrong guess — red tint, strikethrough effect */
+.key-btn.key-wrong {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--red);
+  cursor: default;
+  opacity: 0.6;
+  box-shadow: none;
+  text-decoration: line-through;
+}
+
+.key-btn:disabled { pointer-events: none; }
+
+/* Status message */
+.status-msg {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  min-height: 24px;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+.status-msg.correct { color: var(--green); }
+.status-msg.wrong   { color: var(--red);   }
+.status-msg.fade    { opacity: 0; }
+
+/* ────────────────────────────────────────────
+   Win / Loss Modal
+   ──────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 11, 10, 0.80);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: #181614;
+  border: 1px solid var(--border-hi);
+  border-radius: 16px;
+  padding: clamp(28px, 5vw, 48px);
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.modal-overlay.visible .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.modal-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px rgba(201,168,76,0.3));
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.modal-desc {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+/* Colour-coded word reveal inside modal */
+.modal-word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.reveal-letter {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+.reveal-letter.guessed { color: var(--green); background: var(--green-dim); }
+.reveal-letter.missed  { color: var(--red);   background: var(--red-dim); }
+.reveal-letter.all-correct { color: var(--gold); background: var(--gold-dim); }
+
+/* ────────────────────────────────────────────
+   Toast Notifications
+   ──────────────────────────────────────────── */
+#toastContainer {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: #1e1c1a;
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: all;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { border-color: var(--red); color: var(--red); }
+.toast.success { border-color: var(--green); color: var(--green); }
+
+/* ────────────────────────────────────────────
+   Keyframe Animations
+   ──────────────────────────────────────────── */
+
+/* Revealed letter pops up */
+@keyframes letterPop {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Word shakes on wrong guess */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+/* Gallows draw-in on page load */
+@keyframes drawGallows {
+  from { stroke-dashoffset: 800; }
+  to   { stroke-dashoffset: 0;   }
+}
+
+.gallows-structure line {
+  stroke-dasharray: 800;
+  stroke-dashoffset: 0;
+  animation: drawGallows 1.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.gallows-structure line:nth-child(1) { animation-delay: 0.0s; }
+.gallows-structure line:nth-child(2) { animation-delay: 0.15s; }
+.gallows-structure line:nth-child(3) { animation-delay: 0.30s; }
+.gallows-structure line:nth-child(4) { animation-delay: 0.42s; }
+.gallows-structure line:nth-child(5) { animation-delay: 0.52s; }
+
+/* Navbar fade in */
+.navbar {
+  animation: fadeDown 0.5s ease both;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Word panel slides in */
+.word-panel {
+  animation: fadeUp 0.55s ease 0.2s both;
+}
+.gallows-panel {
+  animation: fadeUp 0.55s ease 0.1s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ────────────────────────────────────────────
+   Responsive — Mobile
+   ──────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 20px;
+  }
+
+  /* Move gallows below word on mobile */
+  .gallows-panel { order: 2; }
+  .word-panel    { order: 1; }
+
+  .gallows-frame { max-width: 260px; margin: 0 auto; }
+
+  .tries-block,
+  .wrong-block { max-width: 100%; }
+
+  .keyboard {
+    grid-template-columns: repeat(7, 1fr);
+    max-width: 100%;
+  }
+
+  .key-btn { padding: 8px 2px; font-size: 0.8rem; }
+
+  .brand-text { font-size: 0.95rem; }
+
+  .btn-ghost span { display: none; } /* hide text on tiny screens if needed */
+}
+
+@media (max-width: 380px) {
+  .keyboard { grid-template-columns: repeat(6, 1fr); }
+  .letter-tile { width: 30px; height: 40px; font-size: 1.2rem; }
+}
+
+/* ────────────────────────────────────────────
+   Accessibility — Reduced Motion
+   ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Scrollbar styling (Webkit)
+   ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
