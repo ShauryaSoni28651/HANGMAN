@@ -40,6 +40,7 @@ rhythm,3,a pattern of beats in music
 > **Tip:** Harder/longer words should get fewer tries. Short common words can have 6–7.
 
 To add words, edit `words.csv` directly on GitHub — click the file, hit the pencil icon, add your rows, and commit. The site updates in ~30 seconds.
+Users can also add their own words using `Load CSV` option. This uses their words instead of the default ones.
 
 ---
 
