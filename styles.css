@@ -308,8 +308,9 @@ body {
 /* Hint */
 .hint-row {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 12px;
 }
 .hint-badge {
   flex-shrink: 0;
@@ -336,6 +337,8 @@ body {
   gap: 10px;
   min-height: 80px;
   align-items: flex-end;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .word-display.shake {
@@ -375,6 +378,7 @@ body {
 
 .key-btn {
   appearance: none;
+  -webkit-appearance: none;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -385,6 +389,8 @@ body {
   padding: 9px 4px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  touch-action: manipulation;           /* removes 300ms tap delay on mobile */
+  -webkit-tap-highlight-color: transparent; /* no blue flash on tap */
   transition:
     background   0.15s,
     border-color 0.15s,
@@ -548,7 +554,9 @@ body {
   font-size: 0.95rem;
   color: var(--text);
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  white-space: nowrap;
+  white-space: normal;
+  max-width: min(340px, calc(100vw - 32px)); /* prevent overflow on mobile */
+  text-align: center;
 
   opacity: 0;
   transform: translateY(10px);
@@ -617,39 +625,134 @@ body {
 }
 
 /* ────────────────────────────────────────────
-   Responsive — Mobile
+   Responsive — Tablet (≤ 860px)
    ──────────────────────────────────────────── */
-@media (max-width: 720px) {
+@media (max-width: 860px) {
+  .game-layout {
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    padding: 20px 20px;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Responsive — Mobile (≤ 680px)
+   Single-column, gallows compact strip on top
+   ──────────────────────────────────────────── */
+@media (max-width: 680px) {
+
+  /* Stack everything vertically */
   .game-layout {
     grid-template-columns: 1fr;
-    padding: 16px;
-    gap: 20px;
+    padding: 12px 14px;
+    gap: 16px;
+    min-height: unset;
   }
 
-  /* Move gallows below word on mobile */
-  .gallows-panel { order: 2; }
-  .word-panel    { order: 1; }
+  /* ── Gallows panel becomes a horizontal strip ── */
+  .gallows-panel {
+    order: 1;
+    display: grid;
+    /* SVG left, stats right */
+    grid-template-columns: 110px 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+    align-items: start;
+  }
 
-  .gallows-frame { max-width: 260px; margin: 0 auto; }
+  .gallows-frame {
+    grid-column: 1;
+    grid-row: 1 / 3;   /* spans both stat rows */
+    padding: 8px;
+    border-radius: 8px;
+  }
 
-  .tries-block,
-  .wrong-block { max-width: 100%; }
+  .tries-block  { grid-column: 2; grid-row: 1; padding: 10px 12px; }
+  .wrong-block  { grid-column: 2; grid-row: 2; padding: 10px 12px; }
 
+  .stat-label   { font-size: 0.62rem; margin-bottom: 6px; }
+  .wrong-list   { font-size: 0.85rem; }
+
+  /* Pips a touch smaller */
+  .pip { width: 10px; height: 10px; }
+
+  /* ── Word panel ── */
+  .word-panel {
+    order: 2;
+    gap: 18px;
+  }
+
+  /* Hint */
+  .hint-text { font-size: 1rem; }
+
+  /* Word tiles — bigger tap targets, wrap naturally */
+  .word-display {
+    gap: 7px;
+    min-height: 56px;
+    justify-content: center;
+  }
+
+  .letter-tile {
+    width: clamp(32px, 9vw, 46px);
+    height: clamp(42px, 11vw, 56px);
+    font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+    border-bottom-width: 2px;
+  }
+
+  /* ── Keyboard: QWERTY-style 3 rows ──
+     Row 1: Q-P (10 keys)
+     Row 2: A-L (9 keys, centred)
+     Row 3: Z-M (7 keys, centred)
+     We achieve this with a flexible wrap layout */
   .keyboard {
-    grid-template-columns: repeat(7, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
     max-width: 100%;
   }
 
-  .key-btn { padding: 8px 2px; font-size: 0.8rem; }
+  .key-btn {
+    /* Each key is a fixed size — big enough for thumbs */
+    width: clamp(30px, 8.5vw, 40px);
+    height: clamp(36px, 10vw, 46px);
+    padding: 0;
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    border-radius: 5px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
 
-  .brand-text { font-size: 0.95rem; }
+  /* Status message */
+  .status-msg { font-size: 0.92rem; text-align: center; }
 
-  .btn-ghost span { display: none; } /* hide text on tiny screens if needed */
+  /* Navbar — tighten up */
+  .navbar { padding: 0 14px; }
+  .brand-text { font-size: 0.88rem; letter-spacing: 0.18em; }
+  .btn { padding: 6px 12px; font-size: 0.82rem; }
 }
 
+/* ────────────────────────────────────────────
+   Responsive — Small phones (≤ 380px)
+   ──────────────────────────────────────────── */
 @media (max-width: 380px) {
-  .keyboard { grid-template-columns: repeat(6, 1fr); }
-  .letter-tile { width: 30px; height: 40px; font-size: 1.2rem; }
+  .gallows-panel {
+    grid-template-columns: 90px 1fr;
+  }
+
+  .key-btn {
+    width: clamp(26px, 7.8vw, 34px);
+    height: clamp(32px, 9.5vw, 40px);
+    font-size: 0.72rem;
+  }
+
+  .letter-tile {
+    width: clamp(28px, 8vw, 36px);
+    height: clamp(36px, 10vw, 46px);
+    font-size: clamp(1rem, 4vw, 1.3rem);
+  }
+
+  .brand-text { display: none; } /* just show the glyph logo */
 }
 
 /* ────────────────────────────────────────────
